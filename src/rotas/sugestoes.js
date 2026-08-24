@@ -7,30 +7,43 @@ const router = express.Router();
 const sugestoes = [];
 let proximoId = 1;
 
-// GET /sugestoes — lista as sugestões, cada uma com sua contagem de votos.
+// GET /sugestoes — lista as sugestões, cada uma como { id, titulo, votos }.
 router.get("/", (req, res) => {
-  // TODO (Tarefa C): responda 200 com o array `sugestoes`
-  //   (cada item no formato { id, titulo, votos }).
-  res.status(501).json({ erro: "não implementado" });
+  res.status(200).json(sugestoes);
 });
 
-// POST /sugestoes — cria uma sugestão { titulo } (TEXTO), começando com 0 votos.
+// POST /sugestoes — corpo { titulo } (texto) → 201 com { id, titulo, votos: 0 }; 400 se faltar titulo.
 router.post("/", (req, res) => {
-  // TODO (Tarefa C):
-  //  1. Leia titulo (texto) de req.body.
-  //  2. Se faltar titulo, responda 400.
-  //  3. Crie { id: proximoId++, titulo, votos: 0 }, adicione em `sugestoes`
-  //     e responda 201 com a sugestão criada.
-  res.status(501).json({ erro: "não implementado" });
+  const { titulo } = req.body;
+
+  if (!titulo) {
+    return res.status(400).json({ erro: "título é obrigatório" });
+  }
+
+  const sugestao = {
+    id: proximoId++,
+    titulo: titulo,
+    votos: 0,
+  };
+
+  sugestoes.push(sugestao); // Adiciona a nova sugestão ao array
+
+  res.status(201).json(sugestao);
 });
 
-// POST /sugestoes/voto — registra um voto na sugestão de id informado { id }.
+// POST /sugestoes/voto — corpo { id } → 200 (incrementa os votos); 400 se o id não existir.
 router.post("/voto", (req, res) => {
-  // TODO (Tarefa C):
-  //  1. Leia id de req.body.
-  //  2. Encontre a sugestão com esse id. Se não existir, responda 400.
-  //  3. Incremente votos dessa sugestão e responda 200 com a sugestão atualizada.
-  res.status(501).json({ erro: "não implementado" });
+  const { id } = req.body;
+
+  const sugestao = sugestoes.find((s) => s.id === id);
+
+  if (!sugestao) {
+    return res.status(400).json({ erro: "sugestão não encontrada" });
+  }
+
+  sugestao.votos += 1; // Incrementa a contagem de votos
+
+  res.status(200).json(sugestao);
 });
 
 module.exports = router;
